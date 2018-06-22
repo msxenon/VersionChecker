@@ -5,7 +5,7 @@ package com.appchief.msa.appchiefvc;
  */
  interface SensetiveData {
       String token = "dcc919e6d156da91e26fd4dcd602681e";
-     String host = "http://192.168.0.106:8000";
+     String host = "http://appchief.net/vc/index.php";
    String urlChecker = host+"/api/application_vc";
      String jsonIP = "http://appchief.net/utils/get_real_ip.php";
      String lib_ver = "1.0";

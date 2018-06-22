@@ -21,7 +21,7 @@ public class Main extends Activity {
         new ACVerionController().init(this).Check(new VersionCheckListener() {
             @Override
             public void CheckSuccess(CheckStatus checkStatus,String msg,String link) {
-               Log.e("ms",checkStatus.name()+" "+msg+" "+link);
+                Log.e("ms",checkStatus.name()+" "+msg+" "+link);
             }
 
             @Override
