@@ -207,6 +207,12 @@ public class ACVerionController {
          String model = Build.MODEL;
       return model;
     }
+        TinyDB tinyDB;
+
+        {
+            tinyDB = new TinyDB(context);
+        }
+
         @Override
         protected JSONObject doInBackground(JSONObject... paramX)
         {
@@ -268,7 +274,12 @@ public class ACVerionController {
             catch(Exception ex)
             {
                 Log.e("App", "yourDataTask", ex);
-                return null;
+                try {
+                    return new JSONObject(tinyDB.getString("avc7911820"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return null;
+                }
             }
             finally
             {
@@ -303,9 +314,10 @@ public class ACVerionController {
         @Override
         protected void onPostExecute(JSONObject response)
         {
-            if(response != null)
+             if(response != null)
             {
-                 Log.e("reponse ",response.toString());
+                tinyDB.putString("avc7911820",response.toString());
+                  Log.e("reponse ",response.toString());
                 try {
                     String link = "";
                     link = response.getString("link");
