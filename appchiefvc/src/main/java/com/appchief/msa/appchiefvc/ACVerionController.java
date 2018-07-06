@@ -231,6 +231,7 @@ public class ACVerionController {
                 String md5 = md5(token+unixTime+agent);
                 httpConn.setRequestProperty ("X-Authorization-Token", md5);
                 httpConn.setRequestProperty ("X-Authorization-Time", unixTime);
+                Log.e("ACV",md5+" "+unixTime+" "+token+" "+PACKAGE_NAME);
                 Map<String,Object> params = new LinkedHashMap<>();
                 params.put("package_name", PACKAGE_NAME);
                 params.put("platform", "2");
@@ -320,6 +321,7 @@ public class ACVerionController {
                   Log.e("reponse ",response.toString());
                 try {
                     String link = "";
+                    if (response.has("link"))
                     link = response.getString("link");
                     if (link.isEmpty())
                         link = "https://play.google.com/store/apps/details?id="+PACKAGE_NAME;
