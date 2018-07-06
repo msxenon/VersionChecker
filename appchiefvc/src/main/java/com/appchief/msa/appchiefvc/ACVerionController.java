@@ -23,6 +23,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -127,77 +128,15 @@ public class ACVerionController {
         if (versionCheckListener == null)
             throw new Error("there is no version check listener attached");
         this.versionCheckListener = versionCheckListener;
-        new CheckPersonalData().execute();
+        new CheckVersionTask().execute();
 
     }
-    protected class CheckPersonalData extends AsyncTask<Void, Void, JSONObject>
-    {
 
-        @Override
-        protected JSONObject doInBackground(Void... voids) {
-
-            HttpURLConnection connection = null;
-            BufferedReader reader = null;
-
-            try {
-                URL url = new URL(SensetiveData.jsonIP);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.connect();
-
-
-                InputStream stream = connection.getInputStream();
-
-                reader = new BufferedReader(new InputStreamReader(stream));
-
-                StringBuffer buffer = new StringBuffer();
-                String line = "";
-
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line+"\n");
-                    Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
-
-                }
-
-                return new JSONObject(buffer.toString());
-
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
-                try {
-                    if (reader != null) {
-                        reader.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject jsonObject) {
-            super.onPostExecute(jsonObject);
-            try {
-                Log.e("Test",jsonObject.toString());
-                 new CheckVersionTask().execute(jsonObject);
-
-            }catch (Exception s){s.printStackTrace();}
-
-        }
-    }
     protected class CheckVersionTask extends AsyncTask<JSONObject, Void, JSONObject>
     {
         public  String GetToday(){
             Date presentTime_Date = Calendar.getInstance().getTime();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-d-M");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
             dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
             return dateFormat.format(presentTime_Date);
         }
@@ -221,17 +160,13 @@ public class ACVerionController {
             BufferedReader bufferedReader = null;
             try
             {
-                String unixTime = GetToday();
                 URL url = new URL(urlChecker);
                 urlConn = url.openConnection();
                 HttpURLConnection httpConn = (HttpURLConnection) urlConn;
                 httpConn.setRequestMethod("POST");
                 String agent =System.getProperty("http.agent");
                 urlConn.setRequestProperty("User-agent", agent);
-                String md5 = md5(token+unixTime+agent);
-                httpConn.setRequestProperty ("X-Authorization-Token", md5);
-                httpConn.setRequestProperty ("X-Authorization-Time", unixTime);
-                Log.e("ACV",md5+" "+unixTime+" "+token+" "+PACKAGE_NAME);
+
                 Map<String,Object> params = new LinkedHashMap<>();
                 params.put("package_name", PACKAGE_NAME);
                 params.put("platform", "2");
@@ -247,8 +182,12 @@ public class ACVerionController {
                 params.put("os_ver",Build.VERSION.RELEASE);
                 params.put("country_name",countryName);
                 params.put("lang",lang);
-
-                     params.put("ip",paramX[0].getString("ip"));
+                String unixTime = GetToday();
+                String md5 = md5(token+unixTime+agent);
+                httpConn.setRequestProperty ("X-Authorization-Token", md5);
+                httpConn.setRequestProperty ("X-Authorization-Time", unixTime);
+                Log.e("ACV",md5+" "+unixTime+" "+token+" "+PACKAGE_NAME+" "+agent);
+                   //  params.put("ip",paramX[0].getString("ip"));
 
                 StringBuilder postData = new StringBuilder();
                 for (Map.Entry<String,Object> param : params.entrySet()) {
@@ -315,17 +254,27 @@ public class ACVerionController {
         @Override
         protected void onPostExecute(JSONObject response)
         {
-             if(response != null)
-            {
-                tinyDB.putString("avc7911820",response.toString());
-                  Log.e("reponse ",response.toString());
+             if(response != null) {
+                 tinyDB.putString("avc7911820", response.toString());
+                 Log.e("reponse ", response.toString());
+             }else{
+                 String x =  tinyDB.getString("avc7911820");
+                 if (x!=null) {
+                     try {
+                         response = new JSONObject(x);
+                     } catch (JSONException e) {
+                         e.printStackTrace();
+                     }
+                 }
+             }
                 try {
                     String link = "";
                     if (response.has("link"))
                     link = response.getString("link");
                     if (link.isEmpty())
                         link = "https://play.google.com/store/apps/details?id="+PACKAGE_NAME;
-                    String message = response.getString("msg");
+                    String message ;
+                    message = response.getString("msg");
                     if (response.getInt("mand_ver") > appVer){
                         versionCheckListener.CheckSuccess(CheckStatus.CHECK_NEWMANDATARY_UPDATE,message,link);
                     } else if (response.getInt("latest_ver") > appVer) {
@@ -345,9 +294,7 @@ public class ACVerionController {
 
                     Log.e("App", "Failure", ex);
                 }
-            }else{
-                versionCheckListener.CheckError("Response is null");
-            }
+
         }
     }
 }
