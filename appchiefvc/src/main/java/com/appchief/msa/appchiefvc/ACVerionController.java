@@ -216,7 +216,7 @@ public class ACVerionController {
                 Log.e("App", "yourDataTask", ex);
                 try {
                     return new JSONObject(tinyDB.getString("avc7911820"));
-                } catch (JSONException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     return null;
                 }
@@ -227,7 +227,7 @@ public class ACVerionController {
                 {
                     try {
                         bufferedReader.close();
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -246,7 +246,7 @@ public class ACVerionController {
                     hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
 
                 return hexString.toString();
-            }catch (NoSuchAlgorithmException e) {
+            }catch (Exception e) {
                 e.printStackTrace();
             }
             return "";
@@ -262,7 +262,7 @@ public class ACVerionController {
                  if (x!=null) {
                      try {
                          response = new JSONObject(x);
-                     } catch (JSONException e) {
+                     } catch (Exception e) {
                          e.printStackTrace();
                      }
                  }
@@ -282,12 +282,12 @@ public class ACVerionController {
                     } else {
                         versionCheckListener.CheckSuccess(CheckStatus.CHECK_NOUPDATE,"no new updates",link);
                     }
-                } catch (JSONException ex) {
+                } catch (Exception ex) {
                     String msg = "";
                     if (response.has("api_message"))
                         try {
                             msg = response.getString("api_message");
-                        } catch (JSONException e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     versionCheckListener.CheckError(msg);
