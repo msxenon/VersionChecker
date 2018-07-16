@@ -283,16 +283,18 @@ public class ACVerionController {
                         versionCheckListener.CheckSuccess(CheckStatus.CHECK_NOUPDATE,"no new updates",link);
                     }
                 } catch (Exception ex) {
-                    String msg = "";
-                    if (response.has("api_message"))
-                        try {
-                            msg = response.getString("api_message");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    versionCheckListener.CheckError(msg);
+                 try {
+                     String msg = "";
+                     if (response.has("api_message"))
+                         try {
+                             msg = response.getString("api_message");
+                         } catch (Exception e) {
+                             e.printStackTrace();
+                         }
+                     versionCheckListener.CheckError(msg);
 
-                    Log.e("App", "Failure", ex);
+                     Log.e("App", "Failure", ex);
+                 }catch (Exception s){s.printStackTrace();}
                 }
 
         }
